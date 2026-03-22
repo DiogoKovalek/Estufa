@@ -17,9 +17,6 @@ unsigned long* tempoDeReferencia = &tempoParaLigar;
 const byte porcentagemDeAgua[5] = {255, 204, 153, 102, 51}; //100%, 80%, 60%, 40%, 20%
 //==========================================
 void setup() {
-  //Teste
-  Serial.begin(9600);
-
   pinMode(pinoLuzUV, OUTPUT);
   pinMode(pinoSensorDeUmidade, INPUT);
   pinMode(pinoBombaDeAgua, OUTPUT);
@@ -41,7 +38,6 @@ void UVLight(){
 
 void WaterBombManager(){
   unsigned short umidade = analogRead(pinoSensorDeUmidade);
-  Serial.println(umidade);
 
   if(umidade >= 800){       // 100%
     analogWrite(pinoBombaDeAgua, porcentagemDeAgua[0]);
