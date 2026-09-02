@@ -6,20 +6,27 @@ const int pinoBombaDeAgua = 3;
 //==========================================
 
 // Luz UV ==================================
-bool luzUVLigada = false;
-const unsigned long tempoDeDuracao = 10 * 1000; // 10 segundos
-const unsigned long tempoParaLigar = 5 * 1000; // 5 segundos
+bool luzUVLigada = true;
+const unsigned long tempoDesligada = 14UL * 60 * 60 * 1000; // 10 segundos
+const unsigned long tempoLigada = 10UL * 60 * 60 * 1000; // 5 segundos
 unsigned long tempoInicial = 0;
-unsigned long* tempoDeReferencia = &tempoParaLigar;
+unsigned long* tempoDeReferencia = &tempoLigada;
 //==========================================
 
 // Bomba de agua ===========================
-const byte porcentagemDeAgua[5] = {255, 204, 153, 102, 51}; //100%, 80%, 60%, 40%, 20%
+bool bombaLigada = false;
+const short minAgua = 900;
+const short maxAgua = 500;
 //==========================================
 void setup() {
   pinMode(pinoLuzUV, OUTPUT);
   pinMode(pinoSensorDeUmidade, INPUT);
   pinMode(pinoBombaDeAgua, OUTPUT);
+
+  //Liga UV
+  digitalWrite(pinoLuzUV, LOW);
+  //Desliga Bomba
+  digitalWrite(pinoBombaDeAgua, HIGH);
 
   //Timer
   tempoInicial = millis();
@@ -39,25 +46,23 @@ void UVLight(){
 void WaterBombManager(){
   unsigned short umidade = analogRead(pinoSensorDeUmidade);
 
-  if(umidade >= 800){       // 100%
-    analogWrite(pinoBombaDeAgua, porcentagemDeAgua[0]);
-  }else if(umidade >= 600){ // 80%
-    analogWrite(pinoBombaDeAgua, porcentagemDeAgua[1]);
-  }else if(umidade >= 400){ // 60%
-    analogWrite(pinoBombaDeAgua, porcentagemDeAgua[2]);
-  }else if(umidade >= 200){ // 40%
-    analogWrite(pinoBombaDeAgua, porcentagemDeAgua[3]);
-  }else{                    // 20%
-    analogWrite(pinoBombaDeAgua, porcentagemDeAgua[4]);
+  if(!bombaLigada && umidade >= minAgua){
+    bombaLigada = true;
+    digitalWrite(pinoBombaDeAgua, LOW);
+  }else if(bombaLigada && umidade <= maxAgua){
+    bombaLigada = false;
+    digitalWrite(pinoBombaDeAgua, HIGH);
   }
 }
 void switchUV(){
-  if(!luzUVLigada){ 
+  if(luzUVLigada){ 
+    //Desliga
     digitalWrite(pinoLuzUV, HIGH);
-    tempoDeReferencia = &tempoDeDuracao;
+    tempoDeReferencia = &tempoDesligada;
   }else{
+    //Liga
     digitalWrite(pinoLuzUV, LOW);
-    tempoDeReferencia = &tempoParaLigar;
+    tempoDeReferencia = &tempoLigada;
   }
 
   tempoInicial = millis();
